@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}SimpleAssisstant — Lab 6{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">WLLM Lab 6 · MCP</p>
+  <h1>SimpleAssisstant</h1>
+  <p class="lede">Two MCP experiments — personal notes memory and live weather context — with Groq deciding which tool to call.</p>
+  <div class="cta-row">
+    <a class="btn primary" href="/memory">Open Memory</a>
+    <a class="btn ghost" href="/weather">Open Weather</a>
+  </div>
+</section>
+
+<section class="split">
+  <article>
+    <h2>Expt 1 · Memory</h2>
+    <p>Save and search notes via MCP tools backed by <code>notes.json</code>.</p>
+  </article>
+  <article>
+    <h2>Expt 2 · Weather</h2>
+    <p>Fetch live data from wttr.in and summarize it for the user.</p>
+  </article>
+</section>
+{% endblock %}

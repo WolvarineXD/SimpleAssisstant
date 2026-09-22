@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Memory Assistant{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>Personal Memory</h1>
+  <p class="lede">Ask the assistant to remember something or search past notes. The LLM picks an MCP tool.</p>
+
+  <form id="ask-form" class="ask">
+    <label for="query">Your message</label>
+    <textarea id="query" name="query" rows="3" placeholder="Remember: the project deadline is Friday&#10;What did I say about the project deadline?" required></textarea>
+    <button type="submit" class="btn primary" id="submit-btn">Ask</button>
+  </form>
+
+  <div id="status" class="status" hidden></div>
+  <div id="results" class="results" hidden>
+    <div class="block">
+      <h3>Thought process</h3>
+      <pre id="thought"></pre>
+    </div>
+    <div class="block">
+      <h3>Tool result</h3>
+      <pre id="tool"></pre>
+    </div>
+    <div class="block highlight">
+      <h3>Final answer</h3>
+      <p id="answer"></p>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const form = document.getElementById("ask-form");
+  const status = document.getElementById("status");
+  const results = document.getElementById("results");
+  const btn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = document.getElementById("query").value.trim();
+    if (!query) return;
+
+    btn.disabled = true;
+    status.hidden = false;
+    status.textContent = "Thinking + calling MCP server...";
+    results.hidden = true;
+
+    try {
+      const res = await fetch("/api/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+
+      document.getElementById("thought").textContent = data.thought;
+      document.getElementById("tool").textContent =
+        data.tool + "(" + JSON.stringify(data.arguments) + ")\n\n" + data.tool_result;
+      document.getElementById("answer").textContent = data.answer;
+      results.hidden = false;
+      status.hidden = true;
+    } catch (err) {
+      status.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+{% endblock %}

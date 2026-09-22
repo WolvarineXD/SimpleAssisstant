@@ -13,11 +13,16 @@ Repository: [WolvarineXD/SimpleAssisstant](https://github.com/WolvarineXD/Simple
 SimpleAssisstant/
 ├── expt1_memory_server/     # Personal Assistant Memory Server
 │   ├── server.py            # MCP tools: save / search / list / delete notes
-│   ├── client.py            # LLM decides which tool to call
-│   └── notes.json           # Local note store
+│   ├── client.py            # CLI client
+│   └── notes.json
 ├── expt2_weather_dashboard/ # Data Dashboard Connector
 │   ├── server.py            # MCP tool: get_current_weather (wttr.in)
-│   └── client.py            # Shows thought process + final answer
+│   └── client.py            # CLI client
+├── web/                     # Browser UI for both experiments
+│   ├── app.py
+│   ├── bridge.py
+│   ├── templates/
+│   └── static/
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -28,20 +33,32 @@ SimpleAssisstant/
 ## Setup
 
 ```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-
-pip install -r requirements.txt
+# Use Windows Python 3.12 (NOT bare `python` — that may be MSYS 3.14 without packages)
+py -3.12 -m pip install -r requirements.txt
 copy .env.example .env   # add your Groq key from https://console.groq.com/keys
 ```
 
 Clients use **Groq** (OpenAI-compatible API: `openai/gpt-oss-20b`).
 Without a key, a **local router** still demonstrates MCP tool calls.
+
+---
+
+## Web UI (recommended)
+
+```bash
+py -3.12 web/app.py
+# or double-click run_web.bat
+```
+
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+| Page | URL |
+|------|-----|
+| Home | `/` |
+| Memory assistant | `/memory` |
+| Weather dashboard | `/weather` |
+
+Each page shows **thought process → tool result → final answer**.
 
 ---
 
@@ -56,10 +73,11 @@ Without a key, a **local router** still demonstrates MCP tool calls.
 | `list_notes()` | Read all |
 | `delete_note(note_id)` | Delete |
 
-**Run the client** (it starts the MCP server over stdio):
+**CLI:**
 
 ```bash
-python expt1_memory_server/client.py
+py -3.12 expt1_memory_server/client.py
+# or double-click run_expt1.bat
 ```
 
 **Try:**
@@ -68,12 +86,6 @@ python expt1_memory_server/client.py
 Remember: the project deadline is Friday
 What did I say about the project deadline?
 ```
-
-The client shows:
-
-1. Thought process (LLM or local router choosing a tool)
-2. Tool result from the MCP server
-3. Final answer (when an OpenAI key is set)
 
 ---
 
@@ -85,10 +97,11 @@ The client shows:
 |------|------|
 | `get_current_weather(location)` | Fetch structured weather from [wttr.in](https://wttr.in) |
 
-**Run:**
+**CLI:**
 
 ```bash
-python expt2_weather_dashboard/client.py
+py -3.12 expt2_weather_dashboard/client.py
+# or double-click run_expt2.bat
 ```
 
 **Try:**
@@ -97,14 +110,12 @@ python expt2_weather_dashboard/client.py
 What's the weather in Tokyo?
 ```
 
-The client prints the LLM’s tool decision, the raw MCP result, then a short summary.
-
 ---
 
 ## How MCP fits
 
 ```
-User query → Client (LLM picks a tool) → MCP Server (runs tool) → result → Client answer
+User query -> Client (LLM picks a tool) -> MCP Server (runs tool) -> result -> Client answer
 ```
 
 - **Server** exposes tools over **stdio**.
@@ -126,4 +137,4 @@ User query → Client (LLM picks a tool) → MCP Server (runs tool) → result �
 ## Requirements
 
 - Python 3.10+
-- Packages: `mcp`, `openai`, `httpx`, `python-dotenv`
+- Packages: `mcp`, `openai`, `httpx`, `python-dotenv`, `flask`

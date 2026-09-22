@@ -58,12 +58,12 @@ async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, 
     Uses OpenAI tool-calling when a key is present.
     """
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key or api_key.startswith("sk-your"):
+    if not api_key or "your" in api_key.lower():
         thought = (
-            "[Local router] No OPENAI_API_KEY — deciding from keywords…"
+            "[Local router] No API key - deciding from keywords..."
         )
         name, args = local_router(user_text)
-        thought += f"\n→ Chosen tool: {name}({json.dumps(args)})"
+        thought += f"\n-> Chosen tool: {name}({json.dumps(args)})"
         return thought, name, args
 
     from openai import OpenAI
@@ -72,7 +72,7 @@ async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, 
         api_key=api_key,
         base_url=os.getenv("OPENAI_BASE_URL") or None,
     )
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    model = os.getenv("OPENAI_MODEL", "openai/gpt-oss-20b")
 
     messages = [
         {
@@ -103,7 +103,7 @@ async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, 
     call = msg.tool_calls[0]
     name = call.function.name
     args = json.loads(call.function.arguments or "{}")
-    thought += f"\n→ Chosen tool: {name}({json.dumps(args)})"
+    thought += f"\n-> Chosen tool: {name}({json.dumps(args)})"
     return thought, name, args
 
 
@@ -124,7 +124,7 @@ async def run_once(session: ClientSession, user_text: str) -> None:
 
     # Optional: ask LLM to phrase a final answer when API key exists
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if api_key and not api_key.startswith("sk-your"):
+    if api_key and "your" not in api_key.lower():
         from openai import OpenAI
 
         tool_text = "\n".join(
@@ -135,7 +135,7 @@ async def run_once(session: ClientSession, user_text: str) -> None:
             base_url=os.getenv("OPENAI_BASE_URL") or None,
         )
         final = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("OPENAI_MODEL", "openai/gpt-oss-20b"),
             messages=[
                 {
                     "role": "system",

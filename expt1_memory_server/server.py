@@ -57,7 +57,7 @@ def save_note(content: str, tags: str = "") -> str:
     _save_notes(notes)
     return (
         f"Saved note #{note['id']}: {note['content'][:80]}"
-        + ("…" if len(note["content"]) > 80 else "")
+        + ("..." if len(note["content"]) > 80 else "")
         + (f" | tags: {', '.join(tag_list)}" if tag_list else "")
     )
 

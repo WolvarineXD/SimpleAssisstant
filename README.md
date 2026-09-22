@@ -37,11 +37,11 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
-copy .env.example .env   # optional: add OPENAI_API_KEY for real LLM routing
+copy .env.example .env   # add your Groq key from https://console.groq.com/keys
 ```
 
-Without an API key, both clients use a **local router** that still demonstrates
-MCP tool calls and prints a visible “thought process”.
+Clients use **Groq** (OpenAI-compatible API: `openai/gpt-oss-20b`).
+Without a key, a **local router** still demonstrates MCP tool calls.
 
 ---
 

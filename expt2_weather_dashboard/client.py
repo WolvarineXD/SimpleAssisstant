@@ -62,14 +62,14 @@ def local_router(user_text: str) -> tuple[str, dict]:
 
 async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, dict]:
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key or api_key.startswith("sk-your"):
+    if not api_key or "your" in api_key.lower():
         thought = (
             "[Thought process]\n"
             "1. User is asking about weather / live data.\n"
             "2. I should call get_current_weather.\n"
         )
         name, args = local_router(user_text)
-        thought += f"3. Decision → {name}({json.dumps(args)})"
+        thought += f"3. Decision -> {name}({json.dumps(args)})"
         return thought, name, args
 
     from openai import OpenAI
@@ -78,7 +78,7 @@ async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, 
         api_key=api_key,
         base_url=os.getenv("OPENAI_BASE_URL") or None,
     )
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    model = os.getenv("OPENAI_MODEL", "openai/gpt-oss-20b")
 
     response = client.chat.completions.create(
         model=model,
@@ -104,7 +104,7 @@ async def call_llm(user_text: str, openai_tools: list[dict]) -> tuple[str, str, 
     call = msg.tool_calls[0]
     name = call.function.name
     args = json.loads(call.function.arguments or "{}")
-    thought += f"\n→ Tool call: {name}({json.dumps(args)})"
+    thought += f"\n-> Tool call: {name}({json.dumps(args)})"
     return thought, name, args
 
 
@@ -117,7 +117,7 @@ async def run_once(session: ClientSession, user_text: str) -> None:
     print(thought)
     print("=" * 50)
 
-    print("\n[Calling MCP server…]")
+    print("\n[Calling MCP server...]")
     result = await session.call_tool(tool_name, arguments)
     tool_text = "\n".join(
         getattr(b, "text", "") for b in result.content if getattr(b, "text", None)
@@ -126,7 +126,7 @@ async def run_once(session: ClientSession, user_text: str) -> None:
     print(tool_text)
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if api_key and not api_key.startswith("sk-your"):
+    if api_key and "your" not in api_key.lower():
         from openai import OpenAI
 
         client = OpenAI(
@@ -134,7 +134,7 @@ async def run_once(session: ClientSession, user_text: str) -> None:
             base_url=os.getenv("OPENAI_BASE_URL") or None,
         )
         final = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("OPENAI_MODEL", "openai/gpt-oss-20b"),
             messages=[
                 {
                     "role": "system",

@@ -54,7 +54,7 @@ def get_current_weather(location: str) -> str:
         return (
             f"Weather for {area}, {country}\n"
             f"  Condition : {desc}\n"
-            f"  Temperature: {temp_c}°C (feels like {feels}°C)\n"
+            f"  Temperature: {temp_c} C (feels like {feels} C)\n"
             f"  Humidity   : {humidity}%\n"
             f"  Wind       : {wind} km/h"
         )
